@@ -2,6 +2,7 @@ package access_log
 
 import (
 	"fmt"
+	"log/syslog"
 	"strconv"
 
 	"github.com/cloudfoundry/gorouter/config"
@@ -30,7 +31,12 @@ func CreateRunningAccessLogger(logger lager.Logger, config *config.Config) (Acce
 	}
 
 	if config.AccessLog.EnableStreaming {
-		writers = append(writers, os.Stdout)
+		syslogWriter, err := syslog.Dial("", "", syslog.LOG_INFO, "gorouter.access_log")
+		if err != nil {
+			logger.Error("Error creating syslog writer", err)
+			return nil, err
+		}
+		writers = append(writers, syslogWriter)
 	}
 
 	var dropsondeSourceInstance string
