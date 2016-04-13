@@ -1,7 +1,8 @@
-package common
+package health
 
 import (
 	"encoding/json"
+	"github.com/cloudfoundry/gorouter/common/schema"
 	"sync"
 )
 
@@ -13,8 +14,8 @@ type GenericVarz struct {
 	Credentials []string `json:"credentials"`
 
 	// These fields are automatically generated
-	UUID      string `json:"uuid"`
-	StartTime Time   `json:"start"`
+	UUID      string      `json:"uuid"`
+	StartTime schema.Time `json:"start"`
 
 	// Static common metrics
 	NumCores int `json:"num_cores"`
@@ -23,8 +24,8 @@ type GenericVarz struct {
 	MemStat int64   `json:"mem"`
 	Cpu     float64 `json:"cpu"`
 
-	Uptime    Duration    `json:"uptime"`
-	LogCounts *LogCounter `json:"log_counts"`
+	Uptime    schema.Duration    `json:"uptime"`
+	LogCounts *schema.LogCounter `json:"log_counts"`
 }
 
 type Varz struct {

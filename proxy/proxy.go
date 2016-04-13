@@ -14,6 +14,7 @@ import (
 
 	"github.com/cloudfoundry/dropsonde"
 	"github.com/cloudfoundry/gorouter/access_log"
+	"github.com/cloudfoundry/gorouter/access_log/schema"
 	router_http "github.com/cloudfoundry/gorouter/common/http"
 	"github.com/cloudfoundry/gorouter/common/secure"
 	"github.com/cloudfoundry/gorouter/metrics"
@@ -146,7 +147,7 @@ func (p *proxy) Drain() {
 
 func (p *proxy) ServeHTTP(responseWriter http.ResponseWriter, request *http.Request) {
 	startedAt := time.Now()
-	accessLog := access_log.AccessLogRecord{
+	accessLog := schema.AccessLogRecord{
 		Request:           request,
 		StartedAt:         startedAt,
 		ExtraHeadersToLog: p.extraHeadersToLog,

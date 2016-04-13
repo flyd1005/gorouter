@@ -11,7 +11,7 @@ import (
 	uaa_config "github.com/cloudfoundry-incubator/uaa-go-client/config"
 	"github.com/cloudfoundry/dropsonde"
 	"github.com/cloudfoundry/gorouter/access_log"
-	vcap "github.com/cloudfoundry/gorouter/common"
+	"github.com/cloudfoundry/gorouter/common/schema"
 	"github.com/cloudfoundry/gorouter/common/secure"
 	"github.com/cloudfoundry/gorouter/config"
 	"github.com/cloudfoundry/gorouter/proxy"
@@ -51,7 +51,7 @@ func main() {
 	flag.Parse()
 
 	c := config.DefaultConfig()
-	logCounter := vcap.NewLogCounter()
+	logCounter := schema.NewLogCounter()
 
 	if configFile != "" {
 		c = config.InitConfigFromFile(configFile)
@@ -248,7 +248,7 @@ func connectToNatsServer(logger lager.Logger, c *config.Config) *nats.Conn {
 	return natsClient
 }
 
-func InitLoggerFromConfig(logger lager.Logger, c *config.Config, logCounter *vcap.LogCounter) {
+func InitLoggerFromConfig(logger lager.Logger, c *config.Config, logCounter *schema.LogCounter) {
 	if c.Logging.File != "" {
 		file, err := os.OpenFile(c.Logging.File, os.O_WRONLY|os.O_APPEND|os.O_CREATE, 0666)
 		if err != nil {

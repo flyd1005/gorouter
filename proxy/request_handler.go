@@ -10,7 +10,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/cloudfoundry/gorouter/access_log"
+	"github.com/cloudfoundry/gorouter/access_log/schema"
 	router_http "github.com/cloudfoundry/gorouter/common/http"
 	"github.com/cloudfoundry/gorouter/metrics"
 	"github.com/cloudfoundry/gorouter/route"
@@ -20,13 +20,13 @@ import (
 type RequestHandler struct {
 	logger    lager.Logger
 	reporter  metrics.ProxyReporter
-	logrecord *access_log.AccessLogRecord
+	logrecord *schema.AccessLogRecord
 
 	request  *http.Request
 	response ProxyResponseWriter
 }
 
-func NewRequestHandler(request *http.Request, response ProxyResponseWriter, r metrics.ProxyReporter, alr *access_log.AccessLogRecord, logger lager.Logger) RequestHandler {
+func NewRequestHandler(request *http.Request, response ProxyResponseWriter, r metrics.ProxyReporter, alr *schema.AccessLogRecord, logger lager.Logger) RequestHandler {
 	requestLogger := setupLogger(request, logger)
 	return RequestHandler{
 		logger:    requestLogger,

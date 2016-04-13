@@ -1,4 +1,4 @@
-package common
+package schema
 
 import (
 	"encoding/json"

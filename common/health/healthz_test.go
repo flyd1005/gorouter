@@ -1,4 +1,4 @@
-package common_test
+package health_test
 
 import (
 	. "github.com/cloudfoundry/gorouter/common"

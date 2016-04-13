@@ -1,4 +1,4 @@
-package common
+package health
 
 type Healthz struct {
 }

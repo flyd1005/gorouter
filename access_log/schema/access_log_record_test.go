@@ -1,7 +1,8 @@
-package access_log_test
+package schema_test
 
 import (
 	. "github.com/cloudfoundry/gorouter/access_log"
+	"github.com/cloudfoundry/gorouter/access_log/schema"
 
 	router_http "github.com/cloudfoundry/gorouter/common/http"
 	"github.com/cloudfoundry/gorouter/route"
@@ -16,7 +17,7 @@ import (
 var _ = Describe("AccessLogRecord", func() {
 
 	It("Makes a record with all values", func() {
-		record := AccessLogRecord{
+		record := schema.AccessLogRecord{
 			Request: &http.Request{
 				Host:   "FakeRequestHost",
 				Method: "FakeRequestMethod",
@@ -63,7 +64,7 @@ var _ = Describe("AccessLogRecord", func() {
 	})
 
 	It("Makes a record with values missing", func() {
-		record := AccessLogRecord{
+		record := schema.AccessLogRecord{
 			Request: &http.Request{
 				Host:   "FakeRequestHost",
 				Method: "FakeRequestMethod",
@@ -100,12 +101,12 @@ var _ = Describe("AccessLogRecord", func() {
 	})
 
 	It("does not create a log message when route endpoint missing", func() {
-		record := AccessLogRecord{}
+		record := schema.AccessLogRecord{}
 		Expect(record.LogMessage()).To(Equal(""))
 	})
 
 	It("Appends extra headers if specified", func() {
-		record := AccessLogRecord{
+		record := schema.AccessLogRecord{
 			Request: &http.Request{
 				Host:   "FakeRequestHost",
 				Method: "FakeRequestMethod",

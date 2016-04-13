@@ -1,4 +1,4 @@
-package common_test
+package schema_test
 
 import (
 	. "github.com/cloudfoundry/gorouter/common"
