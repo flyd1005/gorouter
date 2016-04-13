@@ -1,7 +1,6 @@
 package schema_test
 
 import (
-	. "github.com/cloudfoundry/gorouter/access_log"
 	"github.com/cloudfoundry/gorouter/access_log/schema"
 
 	router_http "github.com/cloudfoundry/gorouter/common/http"

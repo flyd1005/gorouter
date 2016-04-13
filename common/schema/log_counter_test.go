@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"strconv"
 
-	. "github.com/cloudfoundry/gorouter/common"
+	"github.com/cloudfoundry/gorouter/common/schema"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"github.com/pivotal-golang/lager"
@@ -29,7 +29,7 @@ var _ = Describe("LogCounter", func() {
 	})
 
 	It("counts the number of records", func() {
-		counter := NewLogCounter()
+		counter := schema.NewLogCounter()
 		counter.Log(infoMsg)
 		Expect(counter.GetCount(strconv.Itoa(int(lager.INFO)))).To(Equal(1))
 
@@ -38,7 +38,7 @@ var _ = Describe("LogCounter", func() {
 	})
 
 	It("counts all log levels", func() {
-		counter := NewLogCounter()
+		counter := schema.NewLogCounter()
 		counter.Log(infoMsg)
 		Expect(counter.GetCount(strconv.Itoa(int(lager.INFO)))).To(Equal(1))
 
@@ -47,7 +47,7 @@ var _ = Describe("LogCounter", func() {
 	})
 
 	It("marshals the set of counts", func() {
-		counter := NewLogCounter()
+		counter := schema.NewLogCounter()
 		counter.Log(infoMsg)
 		counter.Log(errMsg)
 

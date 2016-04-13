@@ -4,7 +4,8 @@ import (
 	"fmt"
 	"strconv"
 
-	. "github.com/cloudfoundry/gorouter/common"
+	"github.com/cloudfoundry/gorouter/common/health"
+	"github.com/cloudfoundry/gorouter/common/schema"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"github.com/pivotal-golang/lager"
@@ -15,8 +16,8 @@ import (
 var _ = Describe("Varz", func() {
 
 	It("contains expected keys", func() {
-		varz := &Varz{}
-		varz.LogCounts = NewLogCounter()
+		varz := &health.Varz{}
+		varz.LogCounts = schema.NewLogCounter()
 
 		bytes, err := json.Marshal(varz)
 		Expect(err).ToNot(HaveOccurred())
@@ -49,8 +50,8 @@ var _ = Describe("Varz", func() {
 	})
 
 	It("contains Log counts", func() {
-		varz := &Varz{}
-		varz.LogCounts = NewLogCounter()
+		varz := &health.Varz{}
+		varz.LogCounts = schema.NewLogCounter()
 
 		infoMsg := lager.LogFormat{
 			LogLevel: lager.INFO,
@@ -70,7 +71,7 @@ var _ = Describe("Varz", func() {
 
 	Context("UniqueVarz", func() {
 		It("marshals as a struct", func() {
-			varz := &Varz{
+			varz := &health.Varz{
 				UniqueVarz: struct {
 					Type  string `json:"my_type"`
 					Index int    `json:"my_index"`
@@ -89,7 +90,7 @@ var _ = Describe("Varz", func() {
 		})
 
 		It("marshals as a map", func() {
-			varz := &Varz{
+			varz := &health.Varz{
 				UniqueVarz: map[string]interface{}{"my_type": "Dea", "my_index": 1},
 			}
 			bytes, _ := json.Marshal(varz)
