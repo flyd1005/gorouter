@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"sync"
 
-	"github.com/cloudfoundry/gorouter/proxy"
+	"github.com/cloudfoundry/gorouter/proxy/utils"
 )
 
 type FakeProxyResponseWriter struct {
@@ -243,4 +243,4 @@ func (fake *FakeProxyResponseWriter) SizeReturns(result1 int) {
 	}{result1}
 }
 
-var _ proxy.ProxyResponseWriter = new(FakeProxyResponseWriter)
+var _ utils.ProxyResponseWriter = new(FakeProxyResponseWriter)

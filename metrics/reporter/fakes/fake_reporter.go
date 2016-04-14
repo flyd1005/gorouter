@@ -6,7 +6,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/cloudfoundry/gorouter/metrics"
+	"github.com/cloudfoundry/gorouter/metrics/reporter"
 	"github.com/cloudfoundry/gorouter/route"
 )
 
@@ -133,4 +133,4 @@ func (fake *FakeProxyReporter) CaptureRoutingResponseArgsForCall(i int) (*route.
 	return fake.captureRoutingResponseArgsForCall[i].b, fake.captureRoutingResponseArgsForCall[i].res, fake.captureRoutingResponseArgsForCall[i].t, fake.captureRoutingResponseArgsForCall[i].d
 }
 
-var _ metrics.ProxyReporter = new(FakeProxyReporter)
+var _ reporter.ProxyReporter = new(FakeProxyReporter)

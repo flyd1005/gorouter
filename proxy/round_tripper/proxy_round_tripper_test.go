@@ -1,11 +1,11 @@
-package proxy_test
+package round_tripper_test
 
 import (
 	"errors"
 	"net"
 	"net/http"
 
-	"github.com/cloudfoundry/gorouter/access_log"
+	"github.com/cloudfoundry/gorouter/access_log/schema"
 	"github.com/cloudfoundry/gorouter/proxy"
 	proxyfakes "github.com/cloudfoundry/gorouter/proxy/fakes"
 	"github.com/cloudfoundry/gorouter/route"
@@ -42,7 +42,7 @@ var _ = Describe("ProxyRoundTripper", func() {
 			req.URL.Scheme = "http"
 			resp = &proxyfakes.FakeProxyResponseWriter{}
 			nullVarz := nullVarz{}
-			nullAccessRecord := &access_log.AccessLogRecord{}
+			nullAccessRecord := &schema.AccessLogRecord{}
 
 			logger = lagertest.NewTestLogger("test")
 			handler = proxy.NewRequestHandler(req, resp, nullVarz, nullAccessRecord, logger)

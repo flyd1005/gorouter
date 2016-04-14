@@ -14,6 +14,7 @@ import (
 	"github.com/cloudfoundry/gorouter/common/schema"
 	"github.com/cloudfoundry/gorouter/common/secure"
 	"github.com/cloudfoundry/gorouter/config"
+	"github.com/cloudfoundry/gorouter/metrics/reporter"
 	"github.com/cloudfoundry/gorouter/proxy"
 	rregistry "github.com/cloudfoundry/gorouter/registry"
 	"github.com/cloudfoundry/gorouter/route_fetcher"
@@ -149,7 +150,7 @@ func createCrypto(logger lager.Logger, secret string) *secure.AesGCM {
 	return crypto
 }
 
-func buildProxy(logger lager.Logger, c *config.Config, registry rregistry.RegistryInterface, accessLogger access_log.AccessLogger, reporter metrics.ProxyReporter, crypto secure.Crypto, cryptoPrev secure.Crypto) proxy.Proxy {
+func buildProxy(logger lager.Logger, c *config.Config, registry rregistry.RegistryInterface, accessLogger access_log.AccessLogger, reporter reporter.ProxyReporter, crypto secure.Crypto, cryptoPrev secure.Crypto) proxy.Proxy {
 	args := proxy.ProxyArgs{
 		Logger:          logger,
 		EndpointTimeout: c.EndpointTimeout,

@@ -1,7 +1,8 @@
-package proxy
+package handler
 
 import (
 	"bufio"
+	"errors"
 	"fmt"
 	"io"
 	"net"
@@ -12,21 +13,28 @@ import (
 
 	"github.com/cloudfoundry/gorouter/access_log/schema"
 	router_http "github.com/cloudfoundry/gorouter/common/http"
-	"github.com/cloudfoundry/gorouter/metrics"
+	"github.com/cloudfoundry/gorouter/metrics/reporter"
+	"github.com/cloudfoundry/gorouter/proxy/utils"
 	"github.com/cloudfoundry/gorouter/route"
 	"github.com/pivotal-golang/lager"
 )
 
+const (
+	MaxRetries = 3
+)
+
+var NoEndpointsAvailable = errors.New("No endpoints available")
+
 type RequestHandler struct {
 	logger    lager.Logger
-	reporter  metrics.ProxyReporter
+	reporter  reporter.ProxyReporter
 	logrecord *schema.AccessLogRecord
 
 	request  *http.Request
-	response ProxyResponseWriter
+	response utils.ProxyResponseWriter
 }
 
-func NewRequestHandler(request *http.Request, response ProxyResponseWriter, r metrics.ProxyReporter, alr *schema.AccessLogRecord, logger lager.Logger) RequestHandler {
+func NewRequestHandler(request *http.Request, response utils.ProxyResponseWriter, r reporter.ProxyReporter, alr *schema.AccessLogRecord, logger lager.Logger) RequestHandler {
 	requestLogger := setupLogger(request, logger)
 	return RequestHandler{
 		logger:    requestLogger,
@@ -89,7 +97,7 @@ func (h *RequestHandler) HandleMissingRoute() {
 
 	h.response.Header().Set("X-Cf-RouterError", "unknown_route")
 	var message string
-	if ValidHost(h.request.Host) {
+	if utils.ValidHost(h.request.Host) {
 		message = fmt.Sprintf("Requested route ('%s') does not exist.", h.request.Host)
 	} else {
 		message = fmt.Sprintf("Requested route does not exist.")
@@ -97,7 +105,8 @@ func (h *RequestHandler) HandleMissingRoute() {
 	h.writeStatus(http.StatusNotFound, message)
 }
 
-func (h *RequestHandler) HandleBadGateway(err error) {
+func (h *RequestHandler) HandleBadGateway(err error, request *http.Request) {
+	h.reporter.CaptureBadGateway(request)
 	h.logger.Error("endpoint-failed", err)
 
 	h.response.Header().Set("X-Cf-RouterError", "endpoint_failure")
@@ -183,9 +192,8 @@ func (h *RequestHandler) serveTcp(iter route.EndpointIterator) error {
 	for {
 		endpoint := iter.Next()
 		if endpoint == nil {
-			h.reporter.CaptureBadGateway(h.request)
-			err = noEndpointsAvailable
-			h.HandleBadGateway(err)
+			err = NoEndpointsAvailable
+			h.HandleBadGateway(err, h.request)
 			return err
 		}
 
@@ -198,7 +206,7 @@ func (h *RequestHandler) serveTcp(iter route.EndpointIterator) error {
 		h.logger.Error("tcp-connection-failed", err)
 
 		retry++
-		if retry == maxRetries {
+		if retry == MaxRetries {
 			return err
 		}
 	}
@@ -230,9 +238,8 @@ func (h *RequestHandler) serveWebSocket(iter route.EndpointIterator) error {
 	for {
 		endpoint := iter.Next()
 		if endpoint == nil {
-			h.reporter.CaptureBadGateway(h.request)
-			err = noEndpointsAvailable
-			h.HandleBadGateway(err)
+			err = NoEndpointsAvailable
+			h.HandleBadGateway(err, h.request)
 			return err
 		}
 
@@ -246,7 +253,7 @@ func (h *RequestHandler) serveWebSocket(iter route.EndpointIterator) error {
 		h.logger.Error("websocket-connection-failed", err)
 
 		retry++
-		if retry == maxRetries {
+		if retry == MaxRetries {
 			return err
 		}
 	}
@@ -265,7 +272,7 @@ func (h *RequestHandler) serveWebSocket(iter route.EndpointIterator) error {
 func (h *RequestHandler) setupRequest(endpoint *route.Endpoint) {
 	h.setRequestURL(endpoint.CanonicalAddr())
 	h.setRequestXForwardedFor()
-	setRequestXRequestStart(h.request)
+	SetRequestXRequestStart(h.request)
 }
 
 func (h *RequestHandler) setRequestURL(addr string) {
@@ -285,13 +292,13 @@ func (h *RequestHandler) setRequestXForwardedFor() {
 	}
 }
 
-func setRequestXRequestStart(request *http.Request) {
+func SetRequestXRequestStart(request *http.Request) {
 	if _, ok := request.Header[http.CanonicalHeaderKey("X-Request-Start")]; !ok {
 		request.Header.Set("X-Request-Start", strconv.FormatInt(time.Now().UnixNano()/1e6, 10))
 	}
 }
 
-func setRequestXCfInstanceId(request *http.Request, endpoint *route.Endpoint) {
+func SetRequestXCfInstanceId(request *http.Request, endpoint *route.Endpoint) {
 	value := endpoint.PrivateInstanceId
 	if value == "" {
 		value = endpoint.CanonicalAddr()

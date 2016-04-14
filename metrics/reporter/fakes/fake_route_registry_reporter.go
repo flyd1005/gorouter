@@ -4,7 +4,7 @@ package fakes
 import (
 	"sync"
 
-	"github.com/cloudfoundry/gorouter/metrics"
+	"github.com/cloudfoundry/gorouter/metrics/reporter"
 )
 
 type FakeRouteRegistryReporter struct {
@@ -14,10 +14,10 @@ type FakeRouteRegistryReporter struct {
 		totalRoutes       int
 		msSinceLastUpdate uint64
 	}
-	CaptureRegistryMessageStub        func(msg metrics.ComponentTagged)
+	CaptureRegistryMessageStub        func(msg reporter.ComponentTagged)
 	captureRegistryMessageMutex       sync.RWMutex
 	captureRegistryMessageArgsForCall []struct {
-		msg metrics.ComponentTagged
+		msg reporter.ComponentTagged
 	}
 }
 
@@ -45,10 +45,10 @@ func (fake *FakeRouteRegistryReporter) CaptureRouteStatsArgsForCall(i int) (int,
 	return fake.captureRouteStatsArgsForCall[i].totalRoutes, fake.captureRouteStatsArgsForCall[i].msSinceLastUpdate
 }
 
-func (fake *FakeRouteRegistryReporter) CaptureRegistryMessage(msg metrics.ComponentTagged) {
+func (fake *FakeRouteRegistryReporter) CaptureRegistryMessage(msg reporter.ComponentTagged) {
 	fake.captureRegistryMessageMutex.Lock()
 	fake.captureRegistryMessageArgsForCall = append(fake.captureRegistryMessageArgsForCall, struct {
-		msg metrics.ComponentTagged
+		msg reporter.ComponentTagged
 	}{msg})
 	fake.captureRegistryMessageMutex.Unlock()
 	if fake.CaptureRegistryMessageStub != nil {
@@ -62,10 +62,10 @@ func (fake *FakeRouteRegistryReporter) CaptureRegistryMessageCallCount() int {
 	return len(fake.captureRegistryMessageArgsForCall)
 }
 
-func (fake *FakeRouteRegistryReporter) CaptureRegistryMessageArgsForCall(i int) metrics.ComponentTagged {
+func (fake *FakeRouteRegistryReporter) CaptureRegistryMessageArgsForCall(i int) reporter.ComponentTagged {
 	fake.captureRegistryMessageMutex.RLock()
 	defer fake.captureRegistryMessageMutex.RUnlock()
 	return fake.captureRegistryMessageArgsForCall[i].msg
 }
 
-var _ metrics.RouteRegistryReporter = new(FakeRouteRegistryReporter)
+var _ reporter.RouteRegistryReporter = new(FakeRouteRegistryReporter)

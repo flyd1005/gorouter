@@ -1,4 +1,4 @@
-package proxy
+package utils
 
 var validHostSpecialChars = map[byte]bool{
 	'-':  true,

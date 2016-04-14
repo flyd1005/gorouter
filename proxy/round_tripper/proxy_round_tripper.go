@@ -1,14 +1,17 @@
-package proxy
+package round_tripper
 
 import (
 	"net"
 	"net/http"
 
+	"github.com/cloudfoundry/gorouter/proxy/handler"
 	"github.com/cloudfoundry/gorouter/route"
 )
 
+type AfterRoundTrip func(rsp *http.Response, endpoint *route.Endpoint, err error)
+
 func NewProxyRoundTripper(backend bool, transport http.RoundTripper, endpointIterator route.EndpointIterator,
-	handler RequestHandler, afterRoundTrip AfterRoundTrip) http.RoundTripper {
+	handler handler.RequestHandler, afterRoundTrip AfterRoundTrip) http.RoundTripper {
 	if backend {
 		return &BackendRoundTripper{
 			transport: transport,
@@ -29,7 +32,7 @@ type BackendRoundTripper struct {
 	iter      route.EndpointIterator
 	transport http.RoundTripper
 	after     AfterRoundTrip
-	handler   *RequestHandler
+	handler   *handler.RequestHandler
 }
 
 func (rt *BackendRoundTripper) RoundTrip(request *http.Request) (*http.Response, error) {
@@ -37,7 +40,7 @@ func (rt *BackendRoundTripper) RoundTrip(request *http.Request) (*http.Response,
 	var res *http.Response
 	var endpoint *route.Endpoint
 
-	for retry := 0; retry < maxRetries; retry++ {
+	for retry := 0; retry < handler.MaxRetries; retry++ {
 		endpoint, err = rt.selectEndpoint(request)
 		if err != nil {
 			return nil, err
@@ -64,9 +67,8 @@ func (rt *BackendRoundTripper) selectEndpoint(request *http.Request) (*route.End
 	endpoint := rt.iter.Next()
 
 	if endpoint == nil {
-		rt.handler.reporter.CaptureBadGateway(request)
-		err := noEndpointsAvailable
-		rt.handler.HandleBadGateway(err)
+		err := handler.NoEndpointsAvailable
+		rt.handler.HandleBadGateway(err, request)
 		return nil, err
 	}
 	return endpoint, nil
@@ -76,7 +78,7 @@ func (rt *BackendRoundTripper) setupRequest(request *http.Request, endpoint *rou
 	rt.handler.Logger().Debug("backend")
 	request.URL.Host = endpoint.CanonicalAddr()
 	request.Header.Set("X-CF-ApplicationID", endpoint.ApplicationId)
-	setRequestXCfInstanceId(request, endpoint)
+	handler.SetRequestXCfInstanceId(request, endpoint)
 }
 
 func (rt *BackendRoundTripper) reportError(err error) {
@@ -87,14 +89,14 @@ func (rt *BackendRoundTripper) reportError(err error) {
 type RouteServiceRoundTripper struct {
 	transport http.RoundTripper
 	after     AfterRoundTrip
-	handler   *RequestHandler
+	handler   *handler.RequestHandler
 }
 
 func (rt *RouteServiceRoundTripper) RoundTrip(request *http.Request) (*http.Response, error) {
 	var err error
 	var res *http.Response
 
-	for retry := 0; retry < maxRetries; retry++ {
+	for retry := 0; retry < handler.MaxRetries; retry++ {
 		res, err = rt.transport.RoundTrip(request)
 		if err == nil || !retryableError(err) {
 			break
@@ -122,4 +124,10 @@ func retryableError(err error) bool {
 	}
 
 	return false
+}
+
+func newRouteServiceEndpoint() *route.Endpoint {
+	return &route.Endpoint{
+		Tags: map[string]string{},
+	}
 }

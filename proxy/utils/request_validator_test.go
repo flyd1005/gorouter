@@ -1,4 +1,4 @@
-package proxy_test
+package utils_test
 
 import (
 	"github.com/cloudfoundry/gorouter/proxy"

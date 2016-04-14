@@ -19,7 +19,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/cloudfoundry/gorouter/metrics/fakes"
+	"github.com/cloudfoundry/gorouter/metrics/reporter/fakes"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )

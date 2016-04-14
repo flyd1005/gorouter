@@ -7,7 +7,7 @@ import (
 	"time"
 
 	fakelogger "github.com/cloudfoundry/gorouter/access_log/fakes"
-	"github.com/cloudfoundry/gorouter/metrics/fakes"
+	"github.com/cloudfoundry/gorouter/metrics/reporter/fakes"
 	"github.com/cloudfoundry/gorouter/proxy"
 	"github.com/cloudfoundry/gorouter/registry"
 	"github.com/cloudfoundry/gorouter/route"

@@ -13,7 +13,7 @@ import (
 	"github.com/cloudfoundry/gorouter/access_log"
 	vcap "github.com/cloudfoundry/gorouter/common"
 	cfg "github.com/cloudfoundry/gorouter/config"
-	"github.com/cloudfoundry/gorouter/metrics/fakes"
+	"github.com/cloudfoundry/gorouter/metrics/reporter/fakes"
 	"github.com/cloudfoundry/gorouter/proxy"
 	rregistry "github.com/cloudfoundry/gorouter/registry"
 	"github.com/cloudfoundry/gorouter/route"
