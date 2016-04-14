@@ -6,8 +6,11 @@ import (
 	"net/http"
 
 	"github.com/cloudfoundry/gorouter/access_log/schema"
-	"github.com/cloudfoundry/gorouter/proxy"
-	proxyfakes "github.com/cloudfoundry/gorouter/proxy/fakes"
+	reqhandler "github.com/cloudfoundry/gorouter/proxy/handler"
+	"github.com/cloudfoundry/gorouter/proxy/round_tripper"
+	roundtripperfakes "github.com/cloudfoundry/gorouter/proxy/round_tripper/fakes"
+	"github.com/cloudfoundry/gorouter/proxy/test_helpers"
+	proxyfakes "github.com/cloudfoundry/gorouter/proxy/utils/fakes"
 	"github.com/cloudfoundry/gorouter/route"
 	routefakes "github.com/cloudfoundry/gorouter/route/fakes"
 	"github.com/cloudfoundry/gorouter/route_service"
@@ -19,13 +22,15 @@ import (
 	. "github.com/onsi/gomega"
 )
 
+type nullVarz struct{}
+
 var _ = Describe("ProxyRoundTripper", func() {
 	Context("RoundTrip", func() {
 		var (
 			proxyRoundTripper http.RoundTripper
 			endpointIterator  *routefakes.FakeEndpointIterator
-			transport         *proxyfakes.FakeRoundTripper
-			handler           proxy.RequestHandler
+			transport         *roundtripperfakes.FakeRoundTripper
+			handler           reqhandler.RequestHandler
 			logger            lager.Logger
 			req               *http.Request
 			resp              *proxyfakes.FakeProxyResponseWriter
@@ -33,7 +38,7 @@ var _ = Describe("ProxyRoundTripper", func() {
 				Err: errors.New("error"),
 				Op:  "dial",
 			}
-			after proxy.AfterRoundTrip
+			after round_tripper.AfterRoundTrip
 		)
 
 		BeforeEach(func() {
@@ -41,12 +46,12 @@ var _ = Describe("ProxyRoundTripper", func() {
 			req = test_util.NewRequest("GET", "myapp.com", "/", nil)
 			req.URL.Scheme = "http"
 			resp = &proxyfakes.FakeProxyResponseWriter{}
-			nullVarz := nullVarz{}
+			nullVarz := test_helpers.NullVarz{}
 			nullAccessRecord := &schema.AccessLogRecord{}
 
 			logger = lagertest.NewTestLogger("test")
-			handler = proxy.NewRequestHandler(req, resp, nullVarz, nullAccessRecord, logger)
-			transport = &proxyfakes.FakeRoundTripper{}
+			handler = reqhandler.NewRequestHandler(req, resp, nullVarz, nullAccessRecord, logger)
+			transport = &roundtripperfakes.FakeRoundTripper{}
 
 			after = func(rsp *http.Response, endpoint *route.Endpoint, err error) {
 				Expect(endpoint.Tags).ShouldNot(BeNil())
@@ -63,7 +68,7 @@ var _ = Describe("ProxyRoundTripper", func() {
 				endpointIterator.NextReturns(endpoint)
 
 				servingBackend := true
-				proxyRoundTripper = proxy.NewProxyRoundTripper(
+				proxyRoundTripper = round_tripper.NewProxyRoundTripper(
 					servingBackend, transport, endpointIterator, handler, after)
 			})
 
@@ -128,7 +133,7 @@ var _ = Describe("ProxyRoundTripper", func() {
 				endpointIterator.NextReturns(endpoint)
 				req.Header.Set(route_service.RouteServiceForwardedUrl, "http://myapp.com/")
 				servingBackend := false
-				proxyRoundTripper = proxy.NewProxyRoundTripper(
+				proxyRoundTripper = round_tripper.NewProxyRoundTripper(
 					servingBackend, transport, endpointIterator, handler, after)
 			})
 
