@@ -1,4 +1,4 @@
-package registry
+package container
 
 import (
 	"strings"
@@ -6,6 +6,7 @@ import (
 	"github.com/cloudfoundry/gorouter/route"
 )
 
+// package name inspired by golang package that includes heap, list and ring.
 type Trie struct {
 	Segment    string
 	Pool       *route.Pool

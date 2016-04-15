@@ -8,6 +8,7 @@ import (
 
 	"github.com/cloudfoundry/gorouter/config"
 	"github.com/cloudfoundry/gorouter/metrics/reporter"
+	"github.com/cloudfoundry/gorouter/registry/container"
 	"github.com/cloudfoundry/gorouter/route"
 	"github.com/pivotal-golang/lager"
 )
@@ -28,7 +29,7 @@ type RouteRegistry struct {
 
 	logger lager.Logger
 
-	byUri *Trie
+	byUri *container.Trie
 
 	pruneStaleDropletsInterval time.Duration
 	dropletStaleThreshold      time.Duration
@@ -42,7 +43,7 @@ type RouteRegistry struct {
 func NewRouteRegistry(logger lager.Logger, c *config.Config, reporter reporter.RouteRegistryReporter) *RouteRegistry {
 	r := &RouteRegistry{}
 	r.logger = logger
-	r.byUri = NewTrie()
+	r.byUri = container.NewTrie()
 
 	r.pruneStaleDropletsInterval = c.PruneStaleDropletsInterval
 	r.dropletStaleThreshold = c.DropletStaleThreshold
@@ -169,7 +170,7 @@ func (r *RouteRegistry) MarshalJSON() ([]byte, error) {
 
 func (r *RouteRegistry) pruneStaleDroplets() {
 	r.Lock()
-	r.byUri.EachNodeWithPool(func(t *Trie) {
+	r.byUri.EachNodeWithPool(func(t *container.Trie) {
 		t.Pool.PruneEndpoints(r.dropletStaleThreshold)
 		t.Snip()
 	})

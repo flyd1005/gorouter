@@ -1,4 +1,4 @@
-package registry_test
+package container_test
 
 import (
 	"github.com/cloudfoundry/gorouter/route"
