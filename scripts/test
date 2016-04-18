@@ -38,5 +38,5 @@ do
 done
 
 #Run all tests -keepGoing
-ginkgo -r -failOnPending -randomizeAllSpecs -skipMeasurements=true -race router "$@"
+ginkgo -r -failOnPending -randomizeAllSpecs -skipMeasurements=true -race "$@"
 

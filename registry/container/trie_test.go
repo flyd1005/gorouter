@@ -3,7 +3,7 @@ package container_test
 import (
 	"github.com/cloudfoundry/gorouter/route"
 
-	. "github.com/cloudfoundry/gorouter/registry"
+	"github.com/cloudfoundry/gorouter/registry/container"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
@@ -11,11 +11,11 @@ import (
 var _ = Describe("Trie", func() {
 
 	var (
-		r *Trie
+		r *container.Trie
 	)
 
 	BeforeEach(func() {
-		r = NewTrie()
+		r = container.NewTrie()
 	})
 
 	Describe(".Find", func() {
@@ -273,7 +273,7 @@ var _ = Describe("Trie", func() {
 		It("removes dead leaves", func() {
 			segments := make([]string, 0)
 			count := 0
-			f := func(r *Trie) {
+			f := func(r *container.Trie) {
 				segments = append(segments, r.Segment)
 				count += 1
 			}
@@ -383,7 +383,7 @@ var _ = Describe("Trie", func() {
 		r.Insert("/foo/bar/baz", p2)
 
 		pools := make([]*route.Pool, 0)
-		r.EachNodeWithPool(func(node *Trie) {
+		r.EachNodeWithPool(func(node *container.Trie) {
 			pools = append(pools, node.Pool)
 		})
 
